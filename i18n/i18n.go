@@ -39,6 +39,10 @@ func RegistPrinter(id string, lang language.Tag) {
 	p.session.Store(id, message.NewPrinter(lang))
 }
 
+func DeletePrinter(id string) {
+	p.session.Delete(id)
+}
+
 // Printf is like fmt.Printf, but using language-specific formatting.
 func Printf(id string, format string, args ...interface{}) {
 	format, args = preArgs(format, args...)

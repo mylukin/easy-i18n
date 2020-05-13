@@ -20,10 +20,16 @@ import (
 func main() {
 	// Detect OS language
 	tag, _ := locale.Detect()
-	sessionId := uuid.NewV4().String()
+	var sessionId string
+	if uuid, err := uuid.NewV4(); err != nil {
+		log.Fatal(err)
+	} else {
+		sessionId = uuid.String()
+	}
 
 	// Set Language
 	i18n.RegistPrinter(sessionId, tag)
+	defer i18n.DeletePrinter(sessionId)
 
 	appName := "easyi18n"
 

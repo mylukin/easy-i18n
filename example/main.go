@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/rain-31/easy-i18n/example/catalog"
@@ -16,8 +17,15 @@ import (
 )
 
 func main() {
-	sessionId := uuid.NewV4().String()
+	var sessionId string
+	if uuid, err := uuid.NewV4(); err != nil {
+		log.Fatal(err)
+	} else {
+		sessionId = uuid.String()
+	}
+
 	i18n.RegistPrinter(sessionId, language.SimplifiedChinese)
+	defer i18n.DeletePrinter(sessionId)
 
 	i18n.Printf(sessionId, `hello world!`)
 	fmt.Println()
