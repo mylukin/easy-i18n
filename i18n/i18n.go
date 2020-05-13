@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/BurntSushi/toml"
 	"golang.org/x/text/language"
@@ -17,7 +18,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var p *message.Printer
+var p printer
 
 // PluralRule is Plural rule
 type PluralRule struct {
@@ -27,36 +28,46 @@ type PluralRule struct {
 	Text  string
 }
 
+type printer struct {
+	session sync.Map
+}
+
 // Message is translation message
 type Message map[string]string
 
-func init() {
-	// default use English
-	p = message.NewPrinter(language.English)
-}
-
-// SetLang set language
-func SetLang(lang language.Tag) {
-	p = message.NewPrinter(lang)
+func RegistPrinter(id string, lang language.Tag) {
+	p.session.Store(id, message.NewPrinter(lang))
 }
 
 // Printf is like fmt.Printf, but using language-specific formatting.
-func Printf(format string, args ...interface{}) {
+func Printf(id string, format string, args ...interface{}) {
 	format, args = preArgs(format, args...)
-	p.Printf(format, args...)
+	if printer, exist := p.session.Load(id); exist == true {
+		printer.(*message.Printer).Printf(format, args...)
+	} else {
+		fmt.Printf(format, args...)
+	}
 }
 
 // Sprintf is like fmt.Sprintf, but using language-specific formatting.
-func Sprintf(format string, args ...interface{}) string {
+func Sprintf(id string, format string, args ...interface{}) string {
 	format, args = preArgs(format, args...)
-	return p.Sprintf(format, args...)
+	if printer, exist := p.session.Load(id); exist == true {
+		return printer.(*message.Printer).Sprintf(format, args...)
+	} else {
+		return fmt.Sprintf(format, args...)
+	}
 }
 
 // Fprintf is like fmt.Fprintf, but using language-specific formatting.
-func Fprintf(w io.Writer, key message.Reference, a ...interface{}) (n int, err error) {
+func Fprintf(id string, w io.Writer, key message.Reference, a ...interface{}) (n int, err error) {
 	format, args := preArgs(key.(string), a...)
 	key = message.Reference(format)
-	return p.Fprintf(w, key, args...)
+	if printer, exist := p.session.Load(id); exist == true {
+		return printer.(*message.Printer).Fprintf(w, key, args...)
+	} else {
+		return fmt.Fprintf(w, format, args)
+	}
 }
 
 // Preprocessing parameters in plural form
@@ -111,11 +122,11 @@ func Plural(cases ...interface{}) []PluralRule {
 	return rules
 }
 
-func unmarshal(path string) (*Message, error) {
+func unmarshal(id, path string) (*Message, error) {
 	result := &Message{}
 	fileExt := strings.ToLower(filepath.Ext(path))
 	if fileExt != ".toml" && fileExt != ".json" && fileExt != ".yaml" {
-		return result, fmt.Errorf(Sprintf("File type not supported"))
+		return result, fmt.Errorf(Sprintf(id, "File type not supported"))
 	}
 
 	buf, err := ioutil.ReadFile(path)

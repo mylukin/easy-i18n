@@ -1,4 +1,4 @@
-package main
+package catalog
 
 import (
 	"golang.org/x/text/language"
@@ -10,6 +10,7 @@ func init() {
 	initEn(language.Make("en"))
 	initZhHans(language.Make("zh-Hans"))
 }
+
 // initEn will init en support.
 func initEn(tag language.Tag) {
 	message.SetString(tag, "%s has %d cat.", "%s has %d cat.")
@@ -20,6 +21,7 @@ func initEn(tag language.Tag) {
 	message.SetString(tag, "hello %s!", "hello %s!")
 	message.SetString(tag, "hello world!", "hello world!")
 }
+
 // initZhHans will init zh-Hans support.
 func initZhHans(tag language.Tag) {
 	message.SetString(tag, "%s has %d cat.", "%s有%d只猫。")

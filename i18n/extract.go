@@ -64,7 +64,7 @@ func Extract(paths []string, outFile string) error {
 							if funcName == "Printf" || funcName == "Sprintf" || funcName == "Fprintf" {
 								fmt.Printf("Extract %+v %v.%v ...\n", namePos, packName, funcName)
 								// Find the string to be translated
-								if str, ok := v.Args[0].(*ast.BasicLit); ok {
+								if str, ok := v.Args[1].(*ast.BasicLit); ok {
 									id := strings.Trim(str.Value, "\"`")
 									if _, ok := messages[id]; !ok {
 										messages[id] = id
@@ -128,7 +128,7 @@ func Extract(paths []string, outFile string) error {
 
 func i18nPackageName(file *ast.File) string {
 	for _, i := range file.Imports {
-		if i.Path.Kind == token.STRING && i.Path.Value == `"github.com/mylukin/easy-i18n/i18n"` {
+		if i.Path.Kind == token.STRING && i.Path.Value == `"github.com/rain-31/easy-i18n/i18n"` {
 			if i.Name == nil {
 				return "i18n"
 			}

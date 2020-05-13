@@ -1,4 +1,4 @@
-package main
+package catalog
 
 import (
 	"golang.org/x/text/language"
@@ -11,6 +11,7 @@ func init() {
 	initZhHans(language.Make("zh-Hans"))
 	initZhHant(language.Make("zh-Hant"))
 }
+
 // initEn will init en support.
 func initEn(tag language.Tag) {
 	message.SetString(tag, "%s extract [path] [outfile]", "%s extract [path] [outfile]")
@@ -24,6 +25,7 @@ func initEn(tag language.Tag) {
 	message.SetString(tag, "merge translations and generate catalog", "merge translations and generate catalog")
 	message.SetString(tag, "srcfile cannot be empty", "srcfile cannot be empty")
 }
+
 // initZhHans will init zh-Hans support.
 func initZhHans(tag language.Tag) {
 	message.SetString(tag, "%s extract [path] [outfile]", "%s 提取 [路径] [输出文件]")
@@ -37,6 +39,7 @@ func initZhHans(tag language.Tag) {
 	message.SetString(tag, "merge translations and generate catalog", "合并翻译并生成目录")
 	message.SetString(tag, "srcfile cannot be empty", "源文件不能为空")
 }
+
 // initZhHant will init zh-Hant support.
 func initZhHant(tag language.Tag) {
 	message.SetString(tag, "%s extract [path] [outfile]", "%s 提取 [路徑] [輸出文件]")

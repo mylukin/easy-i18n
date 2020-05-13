@@ -3,7 +3,7 @@ package main
 //go:generate go run main.go extract . ./locales/en.json
 //go:generate go run main.go update ./locales/en.json ./locales/zh-Hans.json
 //go:generate go run main.go update ./locales/en.json ./locales/zh-Hant.json
-//go:generate go run main.go generate ./locales ./catalog.go --pkg=main
+//go:generate go run main.go generate --pkg=catalog ./locales ./catalog/catalog.go
 
 import (
 	"fmt"
@@ -11,23 +11,26 @@ import (
 	"os"
 
 	"github.com/Xuanwo/go-locale"
-	"github.com/mylukin/easy-i18n/i18n"
+	_ "github.com/rain-31/easy-i18n/easyi18n/catalog"
+	"github.com/rain-31/easy-i18n/i18n"
+	uuid "github.com/satori/go.uuid"
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	// Detect OS language
 	tag, _ := locale.Detect()
+	sessionId := uuid.NewV4().String()
 
 	// Set Language
-	i18n.SetLang(tag)
+	i18n.RegistPrinter(sessionId, tag)
 
 	appName := "easyi18n"
 
 	app := &cli.App{
 		HelpName: appName,
 		Name:     appName,
-		Usage:    i18n.Sprintf(`a tool for managing message translations.`),
+		Usage:    i18n.Sprintf(sessionId, `a tool for managing message translations.`),
 		Action: func(c *cli.Context) error {
 			cli.ShowAppHelp(c)
 			return nil
@@ -37,20 +40,20 @@ func main() {
 			{
 				Name:      "update",
 				Aliases:   []string{"u"},
-				Usage:     i18n.Sprintf(`merge translations and generate catalog`),
-				UsageText: i18n.Sprintf(`%s update srcfile destfile`, appName),
+				Usage:     i18n.Sprintf(sessionId, `merge translations and generate catalog`),
+				UsageText: i18n.Sprintf(sessionId, `%s update srcfile destfile`, appName),
 				Action: func(c *cli.Context) error {
 					srcFile := c.Args().Get(0)
 					if len(srcFile) == 0 {
-						return fmt.Errorf(i18n.Sprintf(`srcfile cannot be empty`))
+						return fmt.Errorf(i18n.Sprintf(sessionId, `srcfile cannot be empty`))
 					}
 
 					destFile := c.Args().Get(1)
 					if len(destFile) == 0 {
-						return fmt.Errorf(i18n.Sprintf(`destfile cannot be empty`))
+						return fmt.Errorf(i18n.Sprintf(sessionId, `destfile cannot be empty`))
 					}
 
-					err := i18n.Update(srcFile, destFile)
+					err := i18n.Update(sessionId, srcFile, destFile)
 
 					return err
 				},
@@ -58,8 +61,8 @@ func main() {
 			{
 				Name:      "extract",
 				Aliases:   []string{"e"},
-				Usage:     i18n.Sprintf(`extracts strings to be translated from code`),
-				UsageText: i18n.Sprintf(`%s extract [path] [outfile]`, appName),
+				Usage:     i18n.Sprintf(sessionId, `extracts strings to be translated from code`),
+				UsageText: i18n.Sprintf(sessionId, `%s extract [path] [outfile]`, appName),
 				Action: func(c *cli.Context) error {
 					path := c.Args().Get(0)
 					if len(path) == 0 {
@@ -78,13 +81,13 @@ func main() {
 			{
 				Name:      "generate",
 				Aliases:   []string{"g"},
-				Usage:     i18n.Sprintf(`generates code to insert translated messages`),
-				UsageText: i18n.Sprintf(`%s generate [path] [outfile]`, appName),
+				Usage:     i18n.Sprintf(sessionId, `generates code to insert translated messages`),
+				UsageText: i18n.Sprintf(sessionId, `%s generate [path] [outfile]`, appName),
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:  "pkg",
 						Value: "main",
-						Usage: i18n.Sprintf(`generated go file package name`),
+						Usage: i18n.Sprintf(sessionId, `generated go file package name`),
 					},
 				},
 				Action: func(c *cli.Context) error {
@@ -98,6 +101,7 @@ func main() {
 					}
 					pkgName := c.String("pkg")
 					err := i18n.Generate(
+						sessionId,
 						pkgName,
 						[]string{
 							path,

@@ -9,20 +9,20 @@ import (
 )
 
 // Update messages
-func Update(srcFile string, destFile string) error {
+func Update(id, srcFile, destFile string) error {
 	if len(srcFile) == 0 {
-		return fmt.Errorf(Sprintf("srcFile cannot be empty"))
+		return fmt.Errorf(Sprintf(id, "srcFile cannot be empty"))
 	}
 
 	if len(destFile) == 0 {
-		return fmt.Errorf(Sprintf("destFile cannot be empty"))
+		return fmt.Errorf(Sprintf(id, "destFile cannot be empty"))
 	}
 
-	srcMessages, err := unmarshal(srcFile)
+	srcMessages, err := unmarshal(id, srcFile)
 	if err != nil {
 		return err
 	}
-	dstMessages, err := unmarshal(destFile)
+	dstMessages, err := unmarshal(id, destFile)
 	if err != nil {
 		return err
 	}

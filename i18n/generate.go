@@ -12,7 +12,7 @@ import (
 )
 
 // Generate catalog.go
-func Generate(pkgName string, paths []string, outFile string) error {
+func Generate(id, pkgName string, paths []string, outFile string) error {
 	if len(paths) == 0 {
 		paths = []string{"."}
 	}
@@ -32,7 +32,7 @@ func Generate(pkgName string, paths []string, outFile string) error {
 				return nil
 			}
 
-			messages, err := unmarshal(path)
+			messages, err := unmarshal(id, path)
 			if err != nil {
 				return err
 			}
